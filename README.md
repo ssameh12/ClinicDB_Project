@@ -45,4 +45,4 @@ CREATE DATABASE ClinicDB;
 
 ## ER Diagram
 The ER diagram represents relationships between patients, doctors, clinics, and appointments.
-![ER Diagram]Clinical Mangement Systemm ER Diagram.png)
+
