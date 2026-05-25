@@ -39,7 +39,10 @@ CREATE DATABASE ClinicDB;
 4. Run sql/queries.sql
 
 5. Run sql/triggers.sql
-
  ## Notes
 - Run files in order
 - Make sure database is created first
+
+## ER Diagram
+The ER diagram represents relationships between patients, doctors, clinics, and appointments.
+![ER Diagram]Clinical Mangement Systemm ER Diagram.png)
