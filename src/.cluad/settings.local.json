@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-Command *)",
+      "PowerShell(Test-Path *)",
+      "PowerShell(node \"C:\\\\Users\\\\amrmo\\\\Desktop\\\\clinic-management-app\\\\scripts\\\\check-db.js\")",
+      "PowerShell(node \"C:\\\\Users\\\\amrmo\\\\Desktop\\\\clinic-management-app\\\\scripts\\\\setup-db.js\")",
+      "PowerShell(node -e \"const fs=require\\('fs'\\);const p=require\\('path'\\);const dir='C:/Users/amrmo/Desktop/clinic-management-app/db';['schema.sql','seed.sql','trigger.sql'].forEach\\(f=>{const s=fs.readFileSync\\(p.join\\(dir,f\\),'utf8'\\);console.log\\(f, '-', s.length, 'bytes,', s.split\\('\\\\n'\\).length, 'lines'\\)}\\)\")"
+    ]
+  }
+}
