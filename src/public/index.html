@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ClinicDB — Clinic Management System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+<style>
+  :root {
+    --sans: 'IBM Plex Sans', sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+    --bg:       #f5f4f0;
+    --surface:  #ffffff;
+    --border:   #e2e0d8;
+    --text:     #1a1a1a;
+    --muted:    #6b6b6b;
+    --hint:     #9a9a9a;
+    --blue:     #1565c0;
+    --blue-bg:  #e8f0fe;
+    --blue-text:#1565c0;
+    --green:    #2e7d32;
+    --green-bg: #e8f5e9;
+    --green-text:#2e7d32;
+    --red:      #c62828;
+    --red-bg:   #ffebee;
+    --red-text: #c62828;
+    --amber-bg: #fff8e1;
+    --amber-text:#e65100;
+    --radius:   8px;
+    --radius-lg:12px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── Layout ── */
+  .shell { display: flex; height: 100vh; overflow: hidden; }
+
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .logo {
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: var(--blue-bg);
+    border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--blue);
+    font-size: 18px;
+  }
+  .logo h1 { font-size: 14px; font-weight: 600; }
+  .logo p  { font-size: 11px; color: var(--muted); }
+
+  .nav-section {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--hint);
+    padding: 1rem 1.25rem 0.35rem;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 1.25rem;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    border-left: 2px solid transparent;
+    transition: all 0.12s;
+    user-select: none;
+  }
+  .nav-item i { font-size: 16px; }
+  .nav-item:hover { background: var(--bg); color: var(--text); }
+  .nav-item.active {
+    background: var(--blue-bg);
+    color: var(--blue);
+    border-left-color: var(--blue);
+    font-weight: 500;
+  }
+
+  .db-status {
+    margin-top: auto;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--hint);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--hint); flex-shrink: 0; }
+  .dot.ok  { background: var(--green); }
+  .dot.err { background: var(--red); }
+
+  /* ── Main area ── */
+  .main { flex: 1; overflow-y: auto; }
+
+  .panel { display: none; padding: 1.75rem 2rem; }
+  .panel.active { display: block; }
+
+  .panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+  .panel-title { font-size: 18px; font-weight: 600; }
+  .panel-sub   { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-family: var(--sans);
+    font-weight: 500;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+  .btn:hover    { background: var(--bg); }
+  .btn:active   { transform: scale(0.98); }
+  .btn.primary  { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .btn.primary:hover { background: #1052a8; }
+  .btn.danger   { background: var(--red-bg); color: var(--red); border-color: #f5c6c6; }
+  .btn.sm       { padding: 5px 10px; font-size: 12px; }
+  .btn-row      { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    margin-bottom: 10px;
+  }
+
+  /* ── Stats ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.25rem;
+  }
+  .stat-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat-value { font-size: 26px; font-weight: 600; }
+
+  /* ── Appointment card ── */
+  .apt-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.25rem;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .apt-card:hover { border-color: #c0bdb0; }
+  .apt-date {
+    text-align: center;
+    min-width: 48px;
+    background: var(--bg);
+    border-radius: var(--radius);
+    padding: 6px 8px;
+    flex-shrink: 0;
+  }
+  .apt-date .day   { font-size: 20px; font-weight: 600; line-height: 1; }
+  .apt-date .month { font-size: 10px; color: var(--muted); text-transform: uppercase; }
+  .apt-main  { flex: 1; min-width: 0; }
+  .apt-title { font-weight: 500; font-size: 14px; }
+  .apt-sub   { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .apt-right { text-align: right; flex-shrink: 0; }
+  .apt-cost  { font-size: 13px; font-weight: 500; }
+  .apt-time  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .apt-actions { display: flex; gap: 6px; margin-top: 6px; justify-content: flex-end; }
+
+  /* ── Badges ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 99px;
+  }
+  .badge.scheduled { background: var(--blue-bg);  color: var(--blue-text); }
+  .badge.completed { background: var(--green-bg); color: var(--green-text); }
+  .badge.cancelled { background: var(--red-bg);   color: var(--red-text); }
+  .badge.pending   { background: var(--amber-bg); color: var(--amber-text); }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 1px 7px;
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--muted);
+    margin-right: 3px;
+  }
+
+  /* ── Forms ── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 12px; color: var(--muted); font-weight: 500; }
+
+  input, select, textarea {
+    font-size: 13px;
+    font-family: var(--sans);
+    padding: 8px 10px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    width: 100%;
+    transition: border-color 0.12s, box-shadow 0.12s;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(21,101,192,0.1);
+  }
+  textarea { resize: vertical; min-height: 72px; }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+
+  /* ── SQL / response boxes ── */
+  .sql-box {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    font-family: var(--mono);
+    font-size: 12px;
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    margin-top: 10px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 120px;
+    overflow: auto;
+    display: none;
+  }
+  .response-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-top: 8px;
+    min-height: 48px;
+    line-height: 1.65;
+    display: none;
+  }
+  .response-box.error { background: var(--red-bg); border-color: #f5c6c6; color: var(--red); }
+  .response-box.ok    { background: var(--green-bg); border-color: #c8e6c9; }
+
+  /* ── Results table ── */
+  .results-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+  .results-table th {
+    text-align: left;
+    padding: 6px 10px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .results-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  .results-table tr:last-child td { border-bottom: none; }
+
+  /* ── People card ── */
+  .person-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.25rem;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .avatar.patient { background: var(--blue-bg);  color: var(--blue); }
+  .avatar.doctor  { background: var(--green-bg); color: var(--green); }
+  .person-main { flex: 1; min-width: 0; }
+  .person-name { font-weight: 500; font-size: 14px; }
+  .person-sub  { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+  /* ── Loading ── */
+  .loading {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--muted); font-size: 13px; padding: 1rem 0;
+  }
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--blue);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Empty ── */
+  .empty {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--hint);
+  }
+  .empty i { font-size: 36px; display: block; margin-bottom: 8px; }
+
+  /* ── Toast ── */
+  #toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--text); color: #fff;
+    font-size: 13px; padding: 10px 16px;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    opacity: 0; transition: opacity 0.2s;
+    pointer-events: none; z-index: 9999;
+    max-width: 320px;
+  }
+  #toast.show { opacity: 1; }
+  #toast.err  { background: var(--red); }
+  #toast.ok   { background: var(--green); }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon"><i class="ti ti-heart-plus" aria-hidden="true"></i></div>
+      <div><h1>ClinicDB</h1><p>Management System</p></div>
+    </div>
+
+    <div class="nav-section">Main</div>
+    <div class="nav-item active" onclick="nav('dashboard',this)">
+      <i class="ti ti-layout-dashboard" aria-hidden="true"></i> Dashboard
+    </div>
+    <div class="nav-item" onclick="nav('book',this)">
+      <i class="ti ti-calendar-plus" aria-hidden="true"></i> Book appointment
+    </div>
+    <div class="nav-item" onclick="nav('appointments',this)">
+      <i class="ti ti-calendar" aria-hidden="true"></i> Appointments
+    </div>
+
+    <div class="nav-section">Records</div>
+    <div class="nav-item" onclick="nav('patients',this)">
+      <i class="ti ti-users" aria-hidden="true"></i> Patients
+    </div>
+    <div class="nav-item" onclick="nav('doctors',this)">
+      <i class="ti ti-stethoscope" aria-hidden="true"></i> Doctors
+    </div>
+    <div class="nav-item" onclick="nav('clinics',this)">
+      <i class="ti ti-building-hospital" aria-hidden="true"></i> Clinics
+    </div>
+    <div class="nav-item" onclick="nav('departments',this)">
+      <i class="ti ti-category" aria-hidden="true"></i> Departments
+    </div>
+
+    <div class="nav-section">Tools</div>
+    <div class="nav-item" onclick="nav('query',this)">
+      <i class="ti ti-terminal-2" aria-hidden="true"></i> SQL assistant
+    </div>
+
+    <div class="db-status">
+      <div class="dot" id="db-dot"></div>
+      <span id="db-label">Checking…</span>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="main">
+
+    <!-- Dashboard -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Dashboard</div>
+          <div class="panel-sub">Live overview of ClinicDB</div>
+        </div>
+        <button class="btn" onclick="loadDashboard()">
+          <i class="ti ti-refresh" aria-hidden="true"></i> Refresh
+        </button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat"><div class="stat-label">Departments</div><div class="stat-value" id="s-dept">—</div></div>
+        <div class="stat"><div class="stat-label">Doctors</div><div class="stat-value" id="s-doc">—</div></div>
+        <div class="stat"><div class="stat-label">Patients</div><div class="stat-value" id="s-pat">—</div></div>
+        <div class="stat"><div class="stat-label">Appointments</div><div class="stat-value" id="s-apt">—</div></div>
+      </div>
+      <div style="font-size:13px;font-weight:500;margin-bottom:0.75rem;">Recent appointments</div>
+      <div id="dash-apts"><div class="loading"><div class="spinner"></div> Loading…</div></div>
+    </div>
+
+    <!-- Book appointment -->
+    <div class="panel" id="panel-book">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Book appointment</div>
+          <div class="panel-sub">Validates through the API before inserting into the database</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Appointment ID</label>
+            <input type="number" id="b-id" placeholder="e.g. 11" min="1" />
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="b-date" />
+          </div>
+          <div class="form-group">
+            <label>Patient ID</label>
+            <select id="b-pat">
+              <option value="">Select patient…</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Doctor ID</label>
+            <select id="b-doc">
+              <option value="">Select doctor…</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Start time</label>
+            <input type="time" id="b-start" />
+          </div>
+          <div class="form-group">
+            <label>End time</label>
+            <input type="time" id="b-end" />
+          </div>
+          <div class="form-group">
+            <label>Cost (EGP)</label>
+            <input type="number" id="b-cost" placeholder="e.g. 500" min="0" />
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="b-status">
+              <option value="scheduled">Scheduled</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>Diagnosis</label>
+            <input type="text" id="b-diag" placeholder="e.g. Hypertension" />
+          </div>
+        </div>
+        <hr />
+        <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;">
+          <button class="btn" onclick="clearBook()">
+            <i class="ti ti-x" aria-hidden="true"></i> Clear
+          </button>
+          <div style="display:flex;gap:8px;">
+            <button class="btn" id="btn-validate" onclick="validateBooking()">
+              <i class="ti ti-shield-check" aria-hidden="true"></i> Validate
+            </button>
+            <button class="btn primary" id="btn-book" onclick="submitBooking()">
+              <i class="ti ti-calendar-plus" aria-hidden="true"></i> Confirm booking
+            </button>
+          </div>
+        </div>
+        <div class="sql-box" id="book-sql"></div>
+        <div class="response-box" id="book-result"></div>
+      </div>
+    </div>
+
+    <!-- Appointments -->
+    <div class="panel" id="panel-appointments">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Appointments</div>
+          <div class="panel-sub">All records — click status to update</div>
+        </div>
+        <button class="btn primary" onclick="loadAppointments()">
+          <i class="ti ti-refresh" aria-hidden="true"></i> Reload
+        </button>
+      </div>
+      <div id="apt-list"><div class="empty"><i class="ti ti-calendar"></i>Click Reload to fetch from database</div></div>
+    </div>
+
+    <!-- Patients -->
+    <div class="panel" id="panel-patients">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Patients</div>
+          <div class="panel-sub">Patient registry</div>
+        </div>
+        <button class="btn primary" onclick="loadPatients()">
+          <i class="ti ti-refresh" aria-hidden="true"></i> Reload
+        </button>
+      </div>
+      <div id="pat-list"><div class="empty"><i class="ti ti-users"></i>Click Reload to fetch from database</div></div>
+    </div>
+
+    <!-- Doctors -->
+    <div class="panel" id="panel-doctors">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Doctors</div>
+          <div class="panel-sub">Medical staff</div>
+        </div>
+        <button class="btn primary" onclick="loadDoctors()">
+          <i class="ti ti-refresh" aria-hidden="true"></i> Reload
+        </button>
+      </div>
+      <div id="doc-list"><div class="empty"><i class="ti ti-stethoscope"></i>Click Reload to fetch from database</div></div>
+    </div>
+
+
+    <!-- Clinics -->
+    <div class="panel" id="panel-clinics">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Clinics</div>
+          <div class="panel-sub">Clinic list grouped by departments</div>
+        </div>
+        <button class="btn primary" onclick="loadClinics()">
+          <i class="ti ti-refresh" aria-hidden="true"></i> Reload
+        </button>
+      </div>
+      <div id="clinic-list"><div class="empty"><i class="ti ti-building-hospital"></i>Click Reload to fetch from database</div></div>
+    </div>
+
+    <!-- Departments -->
+    <div class="panel" id="panel-departments">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Departments</div>
+          <div class="panel-sub">Hospital departments with related clinic and doctor counts</div>
+        </div>
+        <button class="btn primary" onclick="loadDepartments()">
+          <i class="ti ti-refresh" aria-hidden="true"></i> Reload
+        </button>
+      </div>
+      <div id="dept-list"><div class="empty"><i class="ti ti-category"></i>Click Reload to fetch from database</div></div>
+    </div>
+
+    <!-- SQL assistant -->
+    <div class="panel" id="panel-query">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">SQL assistant</div>
+          <div class="panel-sub">Ask a question in plain English — Rule-based SQL generator creates safe SELECT queries and can run them</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="form-group">
+          <label>Your question</label>
+          <textarea id="q-input" rows="3"
+            placeholder="e.g. Which doctor has the most appointments?&#10;What is the total revenue by department?&#10;List patients diagnosed with Migraine"></textarea>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;">
+          <button class="btn" onclick="generateSQL()">
+            <i class="ti ti-code" aria-hidden="true"></i> Generate SQL
+          </button>
+          <button class="btn primary" onclick="generateAndRun()">
+            <i class="ti ti-player-play" aria-hidden="true"></i> Generate &amp; run
+          </button>
+        </div>
+        <div class="sql-box" id="q-sql"></div>
+        <div class="response-box" id="q-explanation"></div>
+        <div id="q-results"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── Config ────────────────────────────────────────────────────────────────────
+const API = window.location.origin + '/api';
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function nav(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  el.classList.add('active');
+  if (id === 'dashboard')   loadDashboard();
+  if (id === 'book')        populateSelects();
+  if (id === 'appointments') loadAppointments();
+  if (id === 'patients')     loadPatients();
+  if (id === 'doctors')      loadDoctors();
+  if (id === 'clinics')      loadClinics();
+  if (id === 'departments')  loadDepartments();
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function toast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show' + (type ? ' ' + type : '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.className = '', 3000);
+}
+
+// ── Fetch helper ──────────────────────────────────────────────────────────────
+async function api(path, options = {}) {
+  const r = await fetch(API + path, {
+    headers: { 'Content-Type': 'application/json' },
+    ...options
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+function loading(html = '') {
+  return `<div class="loading"><div class="spinner"></div> ${html || 'Loading…'}</div>`;
+}
+
+// ── Health / DB status ────────────────────────────────────────────────────────
+async function checkHealth() {
+  const dot = document.getElementById('db-dot');
+  const lbl = document.getElementById('db-label');
+  try {
+    const d = await api('/health');
+    dot.className = 'dot ok';
+    lbl.textContent = 'DB connected';
+  } catch {
+    dot.className = 'dot err';
+    lbl.textContent = 'DB offline';
+  }
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+async function loadDashboard() {
+  try {
+    const stats = await api('/stats');
+    document.getElementById('s-dept').textContent = stats.departments;
+    document.getElementById('s-doc').textContent  = stats.doctors;
+    document.getElementById('s-pat').textContent  = stats.patients;
+    document.getElementById('s-apt').textContent  = stats.appointments;
+  } catch (e) {
+    toast('Could not load stats: ' + e.message, 'err');
+  }
+
+  const el = document.getElementById('dash-apts');
+  el.innerHTML = loading();
+  try {
+    const apts = await api('/appointments');
+    el.innerHTML = apts.slice(0, 6).map(aptCard).join('') || '<div class="empty">No appointments</div>';
+  } catch (e) {
+    el.innerHTML = `<div class="empty"><i class="ti ti-alert-circle"></i>${e.message}</div>`;
+  }
+}
+
+// ── Appointments ──────────────────────────────────────────────────────────────
+function aptCard(a) {
+  const d = new Date(a.AppointmentDate || a.date);
+  const day   = isNaN(d) ? '?' : d.getDate();
+  const month = isNaN(d) ? '?' : d.toLocaleString('en', { month: 'short' });
+  const st = a.StartTime || '';
+  const et = a.EndTime   || '';
+
+  return `<div class="apt-card">
+    <div class="apt-date"><div class="day">${day}</div><div class="month">${month}</div></div>
+    <div class="apt-main">
+      <div class="apt-title">${a.PatientName || a.patient} → ${a.DoctorName || a.doctor}</div>
+      <div class="apt-sub">
+        <span class="tag">${a.Department || a.dept || ''}</span>
+        <span class="tag">${a.Diagnosis  || a.diag || ''}</span>
+      </div>
+      <div class="apt-actions">
+        <button class="btn sm" onclick="updateStatus(${a.AppointmentID || a.id},'completed')">✓ Complete</button>
+        <button class="btn sm danger" onclick="updateStatus(${a.AppointmentID || a.id},'cancelled')">✗ Cancel</button>
+        <button class="btn sm danger" onclick="deleteApt(${a.AppointmentID || a.id})">
+          <i class="ti ti-trash" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+    <div class="apt-right">
+      <span class="badge ${(a.Status || a.status || '').toLowerCase()}">${a.Status || a.status || ''}</span>
+      <div class="apt-cost">EGP ${Number(a.Cost || a.cost || 0).toLocaleString()}</div>
+      <div class="apt-time">${st.slice(0,5)}–${et.slice(0,5)}</div>
+    </div>
+  </div>`;
+}
+
+async function loadAppointments() {
+  const el = document.getElementById('apt-list');
+  el.innerHTML = loading();
+  try {
+    const apts = await api('/appointments');
+    el.innerHTML = apts.length
+      ? apts.map(aptCard).join('')
+      : '<div class="empty"><i class="ti ti-calendar"></i>No appointments found</div>';
+  } catch (e) {
+    el.innerHTML = `<div class="empty"><i class="ti ti-alert-circle"></i>${e.message}</div>`;
+  }
+}
+
+async function updateStatus(id, status) {
+  try {
+    await api(`/appointments/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status })
+    });
+    toast(`Appointment #${id} marked as ${status}`, 'ok');
+    loadAppointments();
+  } catch (e) {
+    toast('Update failed: ' + e.message, 'err');
+  }
+}
+
+async function deleteApt(id) {
+  if (!confirm(`Delete appointment #${id}?`)) return;
+  try {
+    await api(`/appointments/${id}`, { method: 'DELETE' });
+    toast(`Appointment #${id} deleted`, 'ok');
+    loadAppointments();
+  } catch (e) {
+    toast('Delete failed: ' + e.message, 'err');
+  }
+}
+
+// ── Patients ──────────────────────────────────────────────────────────────────
+function initials(name) {
+  return (name || '?').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+}
+
+async function loadPatients() {
+  const el = document.getElementById('pat-list');
+  el.innerHTML = loading();
+  try {
+    const rows = await api('/patients');
+    el.innerHTML = rows.map(p => `
+      <div class="person-card">
+        <div class="avatar patient">${initials(p.Name)}</div>
+        <div class="person-main">
+          <div class="person-name">${p.Name}</div>
+          <div class="person-sub">${p.Job} · ${p.Address} · ${p.PhoneNumber}</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);">ID ${p.PatientID} · Born ${p.BirthDate?.slice(0,10)||''}</div>
+      </div>`).join('') || '<div class="empty">No patients found</div>';
+  } catch (e) {
+    el.innerHTML = `<div class="empty"><i class="ti ti-alert-circle"></i>${e.message}</div>`;
+  }
+}
+
+// ── Doctors ───────────────────────────────────────────────────────────────────
+async function loadDoctors() {
+  const el = document.getElementById('doc-list');
+  el.innerHTML = loading();
+  try {
+    const rows = await api('/doctors');
+    el.innerHTML = rows.map(d => `
+      <div class="person-card">
+        <div class="avatar doctor"><i class="ti ti-stethoscope" style="font-size:18px;" aria-hidden="true"></i></div>
+        <div class="person-main">
+          <div class="person-name">${d.Name}</div>
+          <div class="person-sub">${d.Department} · ${d.Address} · ${d.PhoneNumber}</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);">ID ${d.DoctorID}</div>
+      </div>`).join('') || '<div class="empty">No doctors found</div>';
+  } catch (e) {
+    el.innerHTML = `<div class="empty"><i class="ti ti-alert-circle"></i>${e.message}</div>`;
+  }
+}
+
+
+// ── Clinics ──────────────────────────────────────────────────────────────────
+async function loadClinics() {
+  const el = document.getElementById('clinic-list');
+  el.innerHTML = loading();
+  try {
+    const rows = await api('/clinics');
+    el.innerHTML = rows.map(c => `
+      <div class="person-card">
+        <div class="avatar doctor"><i class="ti ti-building-hospital" style="font-size:18px;" aria-hidden="true"></i></div>
+        <div class="person-main">
+          <div class="person-name">${c.Name}</div>
+          <div class="person-sub">${c.Department || 'No department'} · ${c.Address}</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);">ID ${c.ClinicID}</div>
+      </div>`).join('') || '<div class="empty">No clinics found</div>';
+  } catch (e) {
+    el.innerHTML = `<div class="empty"><i class="ti ti-alert-circle"></i>${e.message}</div>`;
+  }
+}
+
+// ── Departments ──────────────────────────────────────────────────────────────
+async function loadDepartments() {
+  const el = document.getElementById('dept-list');
+  el.innerHTML = loading();
+  try {
+    const rows = await api('/departments');
+    el.innerHTML = rows.map(d => `
+      <div class="person-card">
+        <div class="avatar patient"><i class="ti ti-category" style="font-size:18px;" aria-hidden="true"></i></div>
+        <div class="person-main">
+          <div class="person-name">${d.Name}</div>
+          <div class="person-sub">${d.ClinicCount} clinic(s) · ${d.DoctorCount} doctor(s)</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);">ID ${d.DepartmentID}</div>
+      </div>`).join('') || '<div class="empty">No departments found</div>';
+  } catch (e) {
+    el.innerHTML = `<div class="empty"><i class="ti ti-alert-circle"></i>${e.message}</div>`;
+  }
+}
+
+// ── Book appointment ──────────────────────────────────────────────────────────
+async function populateSelects() {
+  try {
+    const [patients, doctors] = await Promise.all([
+      api('/patients'), api('/doctors')
+    ]);
+    const pSel = document.getElementById('b-pat');
+    pSel.innerHTML = '<option value="">Select patient…</option>' +
+      patients.map(p => `<option value="${p.PatientID}">${p.Name} (ID ${p.PatientID})</option>`).join('');
+    const dSel = document.getElementById('b-doc');
+    dSel.innerHTML = '<option value="">Select doctor…</option>' +
+      doctors.map(d => `<option value="${d.DoctorID}">${d.Name} — ${d.Department}</option>`).join('');
+  } catch (e) {
+    toast('Could not load patients/doctors: ' + e.message, 'err');
+  }
+}
+
+function getBookingFields() {
+  return {
+    AppointmentID:   document.getElementById('b-id').value,
+    AppointmentDate: document.getElementById('b-date').value,
+    PatientID:       document.getElementById('b-pat').value,
+    DoctorID:        document.getElementById('b-doc').value,
+    StartTime:       document.getElementById('b-start').value,
+    EndTime:         document.getElementById('b-end').value,
+    Cost:            document.getElementById('b-cost').value,
+    Status:          document.getElementById('b-status').value,
+    Diagnosis:       document.getElementById('b-diag').value,
+  };
+}
+
+async function validateBooking() {
+  const b = getBookingFields();
+  if (Object.values(b).some(v => !v)) { toast('Fill in all fields first', 'err'); return; }
+
+  const sqlEl = document.getElementById('book-sql');
+  const resEl = document.getElementById('book-result');
+  sqlEl.style.display = 'block';
+  sqlEl.textContent = buildInsertSQL(b);
+  resEl.style.display = 'block';
+  resEl.className = 'response-box';
+  resEl.innerHTML = '<div class="loading"><div class="spinner"></div> API is checking availability…</div>';
+
+  try {
+    // get existing apts for that doctor/date
+    const apts = await api('/appointments');
+    const existing = apts.filter(a =>
+      String(a.DoctorID) === String(b.DoctorID) &&
+      (a.AppointmentDate || '').slice(0, 10) === b.AppointmentDate
+    );
+    const r = await api('/ai/validate-booking', {
+      method: 'POST',
+      body: JSON.stringify({ booking: b, existingAppointments: existing })
+    });
+    resEl.textContent = r.message;
+    resEl.className = 'response-box' + (r.message.startsWith('✗') ? ' error' : ' ok');
+  } catch (e) {
+    resEl.textContent = 'Validation unavailable: ' + e.message;
+    resEl.className = 'response-box error';
+  }
+}
+
+async function submitBooking() {
+  const b = getBookingFields();
+  if (Object.values(b).some(v => !v)) { toast('Fill in all fields', 'err'); return; }
+
+  const sqlEl = document.getElementById('book-sql');
+  const resEl = document.getElementById('book-result');
+  sqlEl.style.display = 'block';
+  sqlEl.textContent = buildInsertSQL(b);
+  resEl.style.display = 'block';
+  resEl.className = 'response-box';
+  resEl.innerHTML = '<div class="loading"><div class="spinner"></div> Inserting into database…</div>';
+
+  try {
+    const r = await api('/appointments', { method: 'POST', body: JSON.stringify(b) });
+    resEl.textContent = '✓ Appointment booked successfully and saved to ClinicDB.';
+    resEl.className = 'response-box ok';
+    toast('Appointment booked!', 'ok');
+    clearBook();
+  } catch (e) {
+    resEl.textContent = '✗ ' + e.message;
+    resEl.className = 'response-box error';
+    toast('Booking failed', 'err');
+  }
+}
+
+function buildInsertSQL(b) {
+  return `INSERT INTO Appointment VALUES (\n` +
+    `  ${b.AppointmentID}, '${b.AppointmentDate}',\n` +
+    `  ${b.PatientID}, ${b.DoctorID},\n` +
+    `  '${b.StartTime}', '${b.EndTime}',\n` +
+    `  ${b.Cost}, '${b.Status}', '${b.Diagnosis}'\n);`;
+}
+
+function clearBook() {
+  ['b-id','b-date','b-start','b-end','b-cost','b-diag'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('b-pat').value = '';
+  document.getElementById('b-doc').value = '';
+  document.getElementById('b-status').value = 'scheduled';
+  document.getElementById('book-sql').style.display = 'none';
+  document.getElementById('book-result').style.display = 'none';
+}
+
+// ── SQL Assistant ─────────────────────────────────────────────────────────────
+let lastGeneratedSQL = '';
+
+async function generateSQL() {
+  const q = document.getElementById('q-input').value.trim();
+  if (!q) return;
+  showQueryLoading();
+  try {
+    const r = await api('/ai/query', { method: 'POST', body: JSON.stringify({ question: q }) });
+    lastGeneratedSQL = r.sql;
+    showQueryResult(r.sql, r.explanation, null);
+  } catch (e) {
+    showQueryResult('', e.message, null);
+  }
+}
+
+async function generateAndRun() {
+  const q = document.getElementById('q-input').value.trim();
+  if (!q) return;
+  showQueryLoading();
+  try {
+    const r = await api('/ai/query', { method: 'POST', body: JSON.stringify({ question: q }) });
+    lastGeneratedSQL = r.sql;
+    let rows = null;
+    try {
+      const runResult = await api('/query/run', {
+        method: 'POST',
+        body: JSON.stringify({ sql: r.sql })
+      });
+      rows = runResult.rows;
+    } catch (runErr) {
+      // show explanation but note run failed
+      r.explanation += '\n\n⚠ Could not run query: ' + runErr.message;
+    }
+    showQueryResult(r.sql, r.explanation, rows);
+  } catch (e) {
+    showQueryResult('', e.message, null);
+  }
+}
+
+function showQueryLoading() {
+  const sqlEl = document.getElementById('q-sql');
+  const expEl = document.getElementById('q-explanation');
+  const resEl = document.getElementById('q-results');
+  sqlEl.style.display = 'block';
+  sqlEl.textContent = 'Generating…';
+  expEl.style.display = 'block';
+  expEl.innerHTML = '<div class="loading"><div class="spinner"></div> Generating SQL…</div>';
+  resEl.innerHTML = '';
+}
+
+function showQueryResult(sql, explanation, rows) {
+  const sqlEl = document.getElementById('q-sql');
+  const expEl = document.getElementById('q-explanation');
+  const resEl = document.getElementById('q-results');
+  sqlEl.textContent = sql || '-- No SQL generated';
+  expEl.textContent = explanation;
+  expEl.className   = 'response-box';
+  expEl.style.display = 'block';
+  if (rows && rows.length) {
+    const cols = Object.keys(rows[0]);
+    resEl.innerHTML = `<div style="overflow-x:auto;margin-top:10px;">
+      <table class="results-table">
+        <thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>
+        <tbody>${rows.map(row =>
+          `<tr>${cols.map(c => `<td>${row[c] ?? ''}</td>`).join('')}</tr>`
+        ).join('')}</tbody>
+      </table>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;">${rows.length} row(s) returned</div>
+    </div>`;
+  } else if (rows && rows.length === 0) {
+    resEl.innerHTML = '<div style="font-size:13px;color:var(--muted);margin-top:8px;">Query returned 0 rows.</div>';
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+checkHealth();
+loadDashboard();
+setInterval(checkHealth, 30000);
+</script>
+</body>
+</html>
