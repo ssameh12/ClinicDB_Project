@@ -109,7 +109,7 @@ That's it. Everything else comes with this project.
 4. Click **Next** → **Execute** to download and install.
 5. When you reach the **Type and Networking** screen, leave everything at the defaults (Standalone, port 3306).
 6. When you reach the **Authentication Method** screen, choose **"Use Strong Password Encryption"** (the default).
-7. On the **Accounts and Roles** screen, you'll be asked to set a **root password**. ⚠️ **Write this password down.** You will need it in the next step.
+7. On the **Accounts and Roles** screen, you'll be asked to set a **root password**.  **Write this password down.** You will need it in the next step.
 8. On the **Windows Service** screen, leave the defaults and make sure **"Start the MySQL Server at System Startup"** is checked.
 9. Click **Next** and **Execute** to finish the install. Close the installer.
 10. **Verify it worked.** Open the Start menu, type `services.msc`, and press Enter. Look for a service called `MySQL80` (or similar). Its status should say **"Running"**. If it does, MySQL is installed and running.
@@ -119,7 +119,7 @@ That's it. Everything else comes with this project.
 1. Go to https://dev.mysql.com/downloads/mysql/
 2. Download the **DMG Archive** for your Mac (Intel or ARM/Apple Silicon).
 3. Open the DMG and run the installer. Click through.
-4. When asked to set a **root password**, ⚠️ **write it down.**
+4. When asked to set a **root password**,  **write it down.**
 5. Open **System Settings** → **MySQL** (it appears as a new pane). Click **Start MySQL Server** if it isn't already running.
 
 ---
@@ -142,7 +142,7 @@ The app needs to know your MySQL password. You'll put it in a small text file ca
 1. Open the project folder (the one you just copied).
 2. Find the file named **`.env.example`**.
 3. Make a copy of it in the same folder and rename the copy to **`.env`** (no `.example` part, just `.env`).
-   - ⚠️ On Windows, you may need to enable **"File name extensions"** in File Explorer (View menu) to be able to rename it properly. The full name must be exactly `.env`.
+   -  On Windows, you may need to enable **"File name extensions"** in File Explorer (View menu) to be able to rename it properly. The full name must be exactly `.env`.
 4. Open `.env` in **Notepad** (Windows) or **TextEdit** (Mac).
 5. Find the line that reads:
    ```
@@ -207,9 +207,9 @@ Database is ready.
 Next step: npm start
 ```
 
-If you see this, the database is ready. ✅
+If you see this, the database is ready. 
 
-> ⚠️ Running `npm run db:setup` **deletes the existing database and recreates it from scratch.** Do not run it again unless you want to wipe everything and start over.
+>  Running `npm run db:setup` **deletes the existing database and recreates it from scratch.** Do not run it again unless you want to wipe everything and start over.
 
 If something goes wrong, jump to [Troubleshooting](#troubleshooting).
 
